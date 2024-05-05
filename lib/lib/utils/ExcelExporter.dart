@@ -46,6 +46,7 @@ class ExcelExporter {
         final message = Message()
           ..from = Address('mascotasautenticas@hotmail.com', 'Mascotas')
           ..recipients.add('gatomieles@gmail.com')
+           ..recipients.add('Mascotasautenticas@gmail.com')
           ..subject = 'Productos Exportados'
           ..text = 'Adjunto encontrarás el archivo de productos exportados.'
           ..attachments.add(FileAttachment(outputFile));
