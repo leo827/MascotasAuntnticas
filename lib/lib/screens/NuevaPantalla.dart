@@ -265,6 +265,9 @@ class _RegistroPageState extends State<RegistroPage> {
 
       await SQLHelper.createItem(datosCliente);
 
+      // Subir los datos a Firestore usando FirebaseHelper
+      await FirebaseHelper.uploadDataToFirestore();
+
       _limpiarCampos();
 
       ScaffoldMessenger.of(context).showSnackBar(

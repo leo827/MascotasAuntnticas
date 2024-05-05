@@ -4,6 +4,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:spamascotas/lib/screens/ExcelExporterClientes.dart';
 import 'package:sqflite/sqflite.dart' as sql;
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SQLHelper {
   static Future<void> closeDatabase() async {
@@ -205,5 +206,40 @@ class SQLHelper {
     ''', [firstDayOfMonth.toIso8601String(), nextMonth.toIso8601String()]);
 
     return result[0]['total'] ?? 0.0;
+  }
+}
+
+class FirebaseHelper {
+  static Future<void> initialize() async {
+    // Agregar cualquier inicialización necesaria para Firebase aquí
+    // Por ejemplo, inicializar Firebase Auth, Firebase Storage, etc.
+    // Aquí un ejemplo de inicialización de Firestore (no olvides importar 'package:cloud_firestore/cloud_firestore.dart')
+    await FirebaseFirestore.instance.settings;
+  }
+
+  static Future<void> uploadDataToFirestore() async {
+    // Obtener los datos de la base de datos SQLite
+    final registros = await SQLHelper.getRegistros();
+
+    // Subir los datos a Firestore
+    final firestore = FirebaseFirestore.instance;
+    final collection = firestore.collection('registros');
+
+    registros.forEach((registro) async {
+      // Crear un nuevo documento en la colección 'registros' con los datos del registro
+      await collection.add({
+        'fecha': registro['fecha'],
+        'nombreCliente': registro['nombreCliente'],
+        'numeroCelular': registro['numeroCelular'],
+        'nombreMascota': registro['nombreMascota'],
+        'tipoMascota': registro['tipoMascota'],
+        'raza': registro['raza'],
+        'servicio': registro['servicio'],
+        'valorAPagar': registro['valorAPagar'],
+        'metodoPago': registro['metodoPago'],
+        'imagen': registro['imagen'],
+        // Agregar los demás campos aquí
+      });
+    });
   }
 }
