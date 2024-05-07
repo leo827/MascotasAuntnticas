@@ -7,7 +7,8 @@ import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
 
 class ExcelExporterClientes {
-  static Future<void> exportToExcelAndSendEmail2(List<Map<String, dynamic>> data) async {
+  static Future<void> exportToExcelAndSendEmail2(
+      List<Map<String, dynamic>> data) async {
     try {
       var excel = Excel.createExcel();
       var sheet = excel['Sheet1'];
@@ -47,10 +48,12 @@ class ExcelExporterClientes {
         await outputFile.writeAsBytes(outputBytes);
         print('Datos exportados a Excel: ${outputFile.path}');
 
-        final smtpServer = hotmail('mascotasautenticas@hotmail.com', '92702689Mascotas*');
+        final smtpServer =
+            hotmail('mascotasautenticas@hotmail.com', '92702689Mascotas*');
         final message = Message()
           ..from = Address('mascotasautenticas@hotmail.com', 'Mascotas')
           ..recipients.add('gatomieles@gmail.com')
+          ..recipients.add('mascotasautenticas@gmail.com')
           ..subject = 'Clientes Exportados'
           ..text = 'Adjunto encontrarás el archivo de clientes exportados.'
           ..attachments.add(FileAttachment(outputFile));

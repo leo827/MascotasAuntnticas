@@ -284,7 +284,7 @@ class _MenuState extends State<Menu> {
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.store),
-              label: 'Tienda',
+              label: 'Boutique',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.calendar_today),

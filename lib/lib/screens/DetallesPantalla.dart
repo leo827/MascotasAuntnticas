@@ -50,6 +50,7 @@ class DetallesPantalla extends StatelessWidget {
                   'Valor a Pagar', registro['valorAPagar'] ?? ''),
               _buildDetallesItem(
                   'Metodo de Pago', registro['metodoPago'] ?? ''),
+              _buildDetallesItem('Atendido por', registro['atendidoPor'] ?? ''),
               const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -59,19 +60,17 @@ class DetallesPantalla extends StatelessWidget {
                         _enviarWhatsApp(registro['numeroCelular'] ?? ''),
                     style: ElevatedButton.styleFrom(
                       foregroundColor: Colors.white,
-                      backgroundColor: Colors.green, // Color del texto
-                      padding: EdgeInsets.symmetric(
-                          vertical: 12, horizontal: 24), // Ajustar el padding
+                      backgroundColor: Colors.green,
+                      padding:
+                          EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                       shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(20), // Bordes redondeados
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                      elevation: 3, // Agregar sombra
+                      elevation: 3,
                     ),
                     child: const Text(
                       'Enviar WhatsApp',
-                      style:
-                          TextStyle(fontSize: 16), // Ajustar tamaño del texto
+                      style: TextStyle(fontSize: 16),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -80,19 +79,17 @@ class DetallesPantalla extends StatelessWidget {
                         _realizarLlamada(registro['numeroCelular'] ?? ''),
                     style: ElevatedButton.styleFrom(
                       foregroundColor: Colors.white,
-                      backgroundColor: Colors.blue, // Color del texto
-                      padding: EdgeInsets.symmetric(
-                          vertical: 12, horizontal: 24), // Ajustar el padding
+                      backgroundColor: Colors.blue,
+                      padding:
+                          EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                       shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(20), // Bordes redondeados
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                      elevation: 3, // Agregar sombra
+                      elevation: 3,
                     ),
                     child: const Text(
                       'Llamar',
-                      style:
-                          TextStyle(fontSize: 16), // Ajustar tamaño del texto
+                      style: TextStyle(fontSize: 16),
                     ),
                   ),
                 ],

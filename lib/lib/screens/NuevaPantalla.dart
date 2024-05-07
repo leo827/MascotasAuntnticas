@@ -18,6 +18,8 @@ class _RegistroPageState extends State<RegistroPage> {
   TextEditingController _nombreClienteController = TextEditingController();
   TextEditingController _numeroCelularController = TextEditingController();
   TextEditingController _nombreMascotaController = TextEditingController();
+  TextEditingController _atendidoPorController = TextEditingController();
+
   String? _tipoMascota;
   TextEditingController _razaController = TextEditingController();
   String? _servicio;
@@ -128,6 +130,8 @@ class _RegistroPageState extends State<RegistroPage> {
                   },
                   items: [
                     'Baño',
+                    'Deslanado',
+                    'corte',
                     'Baño Deslanado',
                     'Baño corte y Deslanado',
                     'Baño seco',
@@ -184,6 +188,19 @@ class _RegistroPageState extends State<RegistroPage> {
                     return null;
                   },
                 ),
+                _buildTextFieldWithIcon(
+                  controller: _atendidoPorController,
+                  labelText: 'Atendido por',
+                  icon: Icons.person,
+                  keyboardType: TextInputType.text,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor, ingrese el nombre de la persona que atendió';
+                    }
+                    return null;
+                  },
+                ),
+
                 const SizedBox(height: 20),
                 // Botón para guardar los datos
                 Container(
@@ -261,6 +278,7 @@ class _RegistroPageState extends State<RegistroPage> {
         'metodoPago': _metodoPago ?? '',
         'fecha': _formatFecha(fecha),
         'imagen': _imagenSeleccionada?.path, // Agregar la ruta de la imagen
+        'atendidoPor': _atendidoPorController.text,
       };
 
       await SQLHelper.createItem(datosCliente);
@@ -293,6 +311,7 @@ class _RegistroPageState extends State<RegistroPage> {
     _nombreMascotaController.clear();
     _razaController.clear();
     _valorAPagarController.clear();
+    _atendidoPorController.clear();
   }
 
   // Widget para construir un campo de texto con un icono
@@ -303,18 +322,23 @@ class _RegistroPageState extends State<RegistroPage> {
     required FormFieldValidator<String>? validator,
     TextInputType? keyboardType,
   }) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      decoration: InputDecoration(
-        labelText: labelText,
-        prefixIcon: Icon(icon),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextFormField(
+        controller: controller,
+        keyboardType: keyboardType,
+        decoration: InputDecoration(
+          labelText: labelText,
+          prefixIcon: Icon(icon),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+        ),
+        validator: validator,
       ),
-      validator: validator,
     );
   }
 
-  // Widget para construir un dropdown con un icono
   Widget _buildDropdownWithIcon({
     required String? value,
     required ValueChanged<String?>? onChanged,
@@ -323,20 +347,26 @@ class _RegistroPageState extends State<RegistroPage> {
     required IconData icon,
     FormFieldValidator<String>? validator,
   }) {
-    return DropdownButtonFormField<String>(
-      value: value,
-      onChanged: onChanged,
-      items: items.map<DropdownMenuItem<String>>((String value) {
-        return DropdownMenuItem<String>(
-          value: value,
-          child: Text(value),
-        );
-      }).toList(),
-      decoration: InputDecoration(
-        labelText: labelText,
-        prefixIcon: Icon(icon),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: DropdownButtonFormField<String>(
+        value: value,
+        onChanged: onChanged,
+        items: items.map<DropdownMenuItem<String>>((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(value),
+          );
+        }).toList(),
+        decoration: InputDecoration(
+          labelText: labelText,
+          prefixIcon: Icon(icon),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+        ),
+        validator: validator,
       ),
-      validator: validator,
     );
   }
 

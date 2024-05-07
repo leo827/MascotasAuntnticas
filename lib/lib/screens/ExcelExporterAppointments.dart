@@ -9,14 +9,16 @@ import 'package:spamascotas/lib/utils/DBHelperCalendary.dart';
 class ExcelExporterAppointments {
   static Future<void> exportAppointmentsToExcel() async {
     try {
-      final List<DBHelperAppointment> appointments = await DBHelperCalendary.getAppointments();
+      final List<DBHelperAppointment> appointments =
+          await DBHelperCalendary.getAppointments();
       final Excel excel = Excel.createExcel();
       final Sheet sheet = excel['Sheet1'];
 
       sheet.appendRow(['ID', 'Título', 'Descripción', 'Fecha', 'Hora']);
 
       for (final appointment in appointments) {
-        final formattedDate = '${appointment.day.year}-${appointment.day.month}-${appointment.day.day}';
+        final formattedDate =
+            '${appointment.day.year}-${appointment.day.month}-${appointment.day.day}';
         sheet.appendRow([
           appointment.id,
           appointment.title,
@@ -35,10 +37,12 @@ class ExcelExporterAppointments {
       print('Citas exportadas a Excel: $excelFilePath');
 
       // Envío por correo electrónico
-      final smtpServer = hotmail('mascotasautenticas@hotmail.com', '92702689Mascotas*');
+      final smtpServer =
+          hotmail('mascotasautenticas@hotmail.com', '92702689Mascotas*');
       final message = Message()
         ..from = Address('mascotasautenticas@hotmail.com', 'Mascotas')
         ..recipients.add('gatomieles@gmail.com')
+        ..recipients.add('mascotasautenticas@gmail.com')
         ..subject = 'Citas Exportadas'
         ..text = 'Adjunto encontrarás el archivo de citas exportadas.'
         ..attachments.add(FileAttachment(outputFile));

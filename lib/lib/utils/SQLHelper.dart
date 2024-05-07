@@ -15,19 +15,21 @@ class SQLHelper {
   static Future<void> createTables(sql.Database database) async {
     await database.execute("""
     CREATE TABLE items(
-      id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-      fecha TEXT,
-      nombreCliente TEXT,  
-      numeroCelular TEXT,
-      nombreMascota TEXT,
-      tipoMascota TEXT,
-      raza TEXT,
-      servicio TEXT,
-      valorAPagar TEXT,
-      metodoPago TEXT,
-      imagen TEXT,
-      createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )
+  id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  fecha TEXT,
+  nombreCliente TEXT,  
+  numeroCelular TEXT,
+  nombreMascota TEXT,
+  tipoMascota TEXT,
+  raza TEXT,
+  servicio TEXT,
+  valorAPagar TEXT,
+  metodoPago TEXT,
+  imagen TEXT,
+  atendidoPor TEXT, 
+  createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+)
+
   """);
   }
 
@@ -108,6 +110,7 @@ class SQLHelper {
     required String valorAPagar,
     required String metodoPago,
     String? rutaImagen,
+    required String atendidoPor,
   }) async {
     final db = await SQLHelper.db();
 
@@ -135,7 +138,8 @@ class SQLHelper {
       'servicio': servicio,
       'valorAPagar': valorAPagar,
       'metodoPago': metodoPago,
-      'imagen': nuevaRutaImagen, // Utiliza la nueva ruta de la imagen
+      'imagen': nuevaRutaImagen,
+      'atendidoPor': atendidoPor,
     };
     final id = await db.insert('items', data,
         conflictAlgorithm: sql.ConflictAlgorithm.replace);
@@ -159,6 +163,7 @@ class SQLHelper {
     required String servicio,
     required String valorAPagar,
     required String metodoPago,
+    required String atendidoPor,
   }) async {
     final db = await SQLHelper.db();
     final data = {
@@ -171,6 +176,7 @@ class SQLHelper {
       'servicio': servicio,
       'valorAPagar': valorAPagar,
       'metodoPago': metodoPago,
+      'atendidoPor': atendidoPor,
     };
     final result =
         await db.update('items', data, where: "id = ?", whereArgs: [id]);
@@ -238,6 +244,7 @@ class FirebaseHelper {
         'valorAPagar': registro['valorAPagar'],
         'metodoPago': registro['metodoPago'],
         'imagen': registro['imagen'],
+        'atendidoPor': registro['atendidoPor'],
         // Agregar los demás campos aquí
       });
     });

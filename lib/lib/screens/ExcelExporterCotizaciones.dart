@@ -66,6 +66,7 @@ class ExcelExporterCotizaciones {
       final message = Message()
         ..from = Address('mascotasautenticas@hotmail.com', 'Mascotas')
         ..recipients.add('gatomieles@gmail.com')
+        ..recipients.add('mascotasautenticas@gmail.com')
         ..subject = 'Cotizaciones Exportadas'
         ..text = 'Adjunto encontrarás el archivo de cotizaciones exportadas.'
         ..attachments.add(FileAttachment(outputFile));

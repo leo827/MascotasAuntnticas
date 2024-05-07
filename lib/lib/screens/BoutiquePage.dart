@@ -33,67 +33,45 @@ class _BoutiquePageState extends State<BoutiquePage> {
           key: _formKey,
           child: ListView(
             children: [
-              TextFormField(
-                decoration: const InputDecoration(
-                  labelText: 'Registro',
-                  hintText: 'Ingrese el registro del producto',
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor ingrese un registro';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  _registro = value!;
-                },
-              ),
+              _buildTextField('Registro', 'Ingrese el registro del producto',
+                  (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Por favor ingrese un registro';
+                }
+                return null;
+              }, (value) {
+                _registro = value!;
+              }),
               const SizedBox(height: 16.0),
-              TextFormField(
-                decoration: const InputDecoration(
-                  labelText: 'Valor',
-                  hintText: 'Ingrese el valor del producto',
-                ),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor ingrese un valor';
-                  }
-                  if (double.tryParse(value) == null) {
-                    return 'Ingrese un número válido';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  _valor = double.parse(value!);
-                },
-              ),
+              _buildTextField('Valor', 'Ingrese el valor del producto',
+                  (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Por favor ingrese un valor';
+                }
+                if (double.tryParse(value) == null) {
+                  return 'Ingrese un número válido';
+                }
+                return null;
+              }, (value) {
+                _valor = double.parse(value!);
+              }, keyboardType: TextInputType.number),
               const SizedBox(height: 16.0),
-              DropdownButtonFormField<String>(
-                decoration: const InputDecoration(
-                  labelText: 'Medio de Pago',
-                ),
-                value: _medioDePago,
-                items: ['Efectivo', 'Nequi', 'Daviplata', 'Débito', 'Crédito']
-                    .map<DropdownMenuItem<String>>(
-                      (String value) => DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (String? value) {
-                  setState(() {
-                    _medioDePago = value!;
-                  });
-                },
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor seleccione un medio de pago';
-                  }
-                  return null;
-                },
-              ),
+              _buildDropdown('Medio de Pago', [
+                'Efectivo',
+                'Nequi',
+                'Daviplata',
+                'Débito',
+                'Crédito'
+              ], (String? value) {
+                setState(() {
+                  _medioDePago = value!;
+                });
+              }, (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Por favor seleccione un medio de pago';
+                }
+                return null;
+              }),
               const SizedBox(height: 32.0),
               ElevatedButton(
                 onPressed: () async {
@@ -121,6 +99,42 @@ class _BoutiquePageState extends State<BoutiquePage> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildTextField(String labelText, String hintText,
+      FormFieldValidator<String>? validator, FormFieldSetter<String> onSaved,
+      {TextInputType? keyboardType}) {
+    return TextFormField(
+      decoration: InputDecoration(
+        labelText: labelText,
+        hintText: hintText,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
+      ),
+      validator: validator,
+      onSaved: onSaved,
+      keyboardType: keyboardType,
+    );
+  }
+
+  Widget _buildDropdown(String labelText, List<String> items,
+      ValueChanged<String?> onChanged, FormFieldValidator<String>? validator) {
+    return DropdownButtonFormField<String>(
+      decoration: InputDecoration(
+        labelText: labelText,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
+      ),
+      value: _medioDePago,
+      items: items
+          .map<DropdownMenuItem<String>>(
+            (String value) => DropdownMenuItem<String>(
+              value: value,
+              child: Text(value),
+            ),
+          )
+          .toList(),
+      onChanged: onChanged,
+      validator: validator,
     );
   }
 }
