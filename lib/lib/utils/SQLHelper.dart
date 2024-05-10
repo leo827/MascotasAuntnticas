@@ -24,7 +24,6 @@ class SQLHelper {
   servicio TEXT,
   valorAPagar TEXT,
   metodoPago TEXT,
-  
   atendidoPor TEXT, 
   createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 )

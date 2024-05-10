@@ -122,7 +122,7 @@ class DetallesCliente extends StatelessWidget {
 
   void _launchCall(String? phoneNumber) async {
     if (phoneNumber != null) {
-      String url = 'tel:$phoneNumber';
+      String url = 'telprompt:$phoneNumber';
       if (await canLaunch(url)) {
         await launch(url);
       } else {
