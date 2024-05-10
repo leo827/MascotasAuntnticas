@@ -1,10 +1,9 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as p;
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:spamascotas/lib/screens/ExcelExporterClientes.dart';
 import 'package:sqflite/sqflite.dart' as sql;
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SQLHelper {
   static Future<void> closeDatabase() async {
@@ -25,7 +24,7 @@ class SQLHelper {
   servicio TEXT,
   valorAPagar TEXT,
   metodoPago TEXT,
-  imagen TEXT,
+  
   atendidoPor TEXT, 
   createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
@@ -109,24 +108,10 @@ class SQLHelper {
     required String servicio,
     required String valorAPagar,
     required String metodoPago,
-    String? rutaImagen,
+    //String? rutaImagen,
     required String atendidoPor,
   }) async {
     final db = await SQLHelper.db();
-
-    String? nuevaRutaImagen;
-    if (rutaImagen != null) {
-      // Obtener el directorio de documentos de la aplicación
-      final Directory directorio = await getApplicationDocumentsDirectory();
-      // Crear un directorio específico para las imágenes si no existe
-      final String rutaAlmacenamiento = p.join(directorio.path, 'imagenes');
-      await Directory(rutaAlmacenamiento).create(recursive: true);
-      // Copiar la imagen al nuevo directorio con un nombre único
-      final String rutaNuevaImagen = p.join(
-          rutaAlmacenamiento, '${DateTime.now().millisecondsSinceEpoch}.jpg');
-      await File(rutaImagen).copy(rutaNuevaImagen);
-      nuevaRutaImagen = rutaNuevaImagen;
-    }
 
     final data = {
       'fecha': fecha,
@@ -138,7 +123,7 @@ class SQLHelper {
       'servicio': servicio,
       'valorAPagar': valorAPagar,
       'metodoPago': metodoPago,
-      'imagen': nuevaRutaImagen,
+      //'rutaImagen': rutaImagen, // Cambiado de 'imagen' a 'rutaImagen'
       'atendidoPor': atendidoPor,
     };
     final id = await db.insert('items', data,
@@ -216,37 +201,32 @@ class SQLHelper {
 }
 
 class FirebaseHelper {
-  static Future<void> initialize() async {
-    // Agregar cualquier inicialización necesaria para Firebase aquí
-    // Por ejemplo, inicializar Firebase Auth, Firebase Storage, etc.
-    // Aquí un ejemplo de inicialización de Firestore (no olvides importar 'package:cloud_firestore/cloud_firestore.dart')
-    await FirebaseFirestore.instance.settings;
+  static Future<void> uploadDataToFirestore(Map<String, dynamic> data) async {
+    try {
+      // Guardar los datos en Firestore
+      await FirebaseFirestore.instance.collection('clientes').add(data);
+      print('Datos guardados en Firestore.');
+    } catch (e) {
+      print('Error al guardar datos en Firestore: $e');
+    }
   }
 
-  static Future<void> uploadDataToFirestore() async {
-    // Obtener los datos de la base de datos SQLite
-    final registros = await SQLHelper.getRegistros();
+  static Future<String> uploadImageToStorage(File imageFile) async {
+    try {
+      // Referencia al bucket de Firebase Storage y ruta donde se guardará la imagen
+      final firebase_storage.Reference ref = firebase_storage
+          .FirebaseStorage.instance
+          .ref()
+          .child('Mascotas/${DateTime.now().millisecondsSinceEpoch}.jpg');
 
-    // Subir los datos a Firestore
-    final firestore = FirebaseFirestore.instance;
-    final collection = firestore.collection('registros');
+      // Subir la imagen
+      final uploadTask = ref.putFile(imageFile);
 
-    registros.forEach((registro) async {
-      // Crear un nuevo documento en la colección 'registros' con los datos del registro
-      await collection.add({
-        'fecha': registro['fecha'],
-        'nombreCliente': registro['nombreCliente'],
-        'numeroCelular': registro['numeroCelular'],
-        'nombreMascota': registro['nombreMascota'],
-        'tipoMascota': registro['tipoMascota'],
-        'raza': registro['raza'],
-        'servicio': registro['servicio'],
-        'valorAPagar': registro['valorAPagar'],
-        'metodoPago': registro['metodoPago'],
-        'imagen': registro['imagen'],
-        'atendidoPor': registro['atendidoPor'],
-        // Agregar los demás campos aquí
-      });
-    });
+      // Obtener la URL de descarga de la imagen
+      return await (await uploadTask).ref.getDownloadURL();
+    } catch (e) {
+      print('Error al subir la imagen: $e');
+      return '';
+    }
   }
 }

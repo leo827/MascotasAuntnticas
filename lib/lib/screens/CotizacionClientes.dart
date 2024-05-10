@@ -30,7 +30,7 @@ class _CotizacionClientesState extends State<CotizacionClientes> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Cotización para Clientes'),
+        title: const Text('Cotización para Clientes'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -40,7 +40,7 @@ class _CotizacionClientesState extends State<CotizacionClientes> {
             children: [
               TextFormField(
                 controller: _nombreClienteController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Nombre del Cliente',
                   border: OutlineInputBorder(),
                 ),
@@ -51,10 +51,10 @@ class _CotizacionClientesState extends State<CotizacionClientes> {
                   return null;
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               TextFormField(
                 controller: _celularController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Número de Celular',
                   border: OutlineInputBorder(),
                 ),
@@ -66,10 +66,10 @@ class _CotizacionClientesState extends State<CotizacionClientes> {
                   return null;
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               TextFormField(
                 controller: _nombreMascotaController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Nombre de la Mascota',
                   border: OutlineInputBorder(),
                 ),
@@ -80,15 +80,17 @@ class _CotizacionClientesState extends State<CotizacionClientes> {
                   return null;
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               DropdownButtonFormField<String>(
                 value: _selectedTipoServicio,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Tipo de Servicio',
                   border: OutlineInputBorder(),
                 ),
                 items: [
                   'Baño',
+                  'Deslanado',
+                  'corte',
                   'Baño Deslanado',
                   'Baño corte y Deslanado',
                   'Baño seco',
@@ -113,10 +115,10 @@ class _CotizacionClientesState extends State<CotizacionClientes> {
                   return null;
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               TextFormField(
                 controller: _valorController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Valor',
                   border: OutlineInputBorder(),
                 ),
@@ -132,14 +134,14 @@ class _CotizacionClientesState extends State<CotizacionClientes> {
                   return null;
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     _guardarRegistro();
                   }
                 },
-                child: Text('Guardar'),
+                child: const Text('Guardar'),
               ),
             ],
           ),
@@ -161,7 +163,7 @@ class _CotizacionClientesState extends State<CotizacionClientes> {
 
     // Mostrar el mensaje de registro exitoso
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+      const SnackBar(
         content: Text('Registro exitoso'),
         duration: Duration(seconds: 2), // Duración del mensaje
       ),
@@ -170,7 +172,7 @@ class _CotizacionClientesState extends State<CotizacionClientes> {
     // Navegar a la clase Menu
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => Menu(body: menu())),
+      MaterialPageRoute(builder: (context) => const Menu(body: menu())),
     );
   }
 

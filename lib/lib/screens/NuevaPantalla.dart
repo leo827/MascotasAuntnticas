@@ -1,3 +1,4 @@
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/material.dart';
 import 'package:spamascotas/lib/screens/Menu.dart';
 import 'HomePage.dart';
@@ -264,9 +265,18 @@ class _RegistroPageState extends State<RegistroPage> {
     );
   }
 
+// Método para guardar los datos del formulario
   // Método para guardar los datos del formulario
   Future<void> _guardarDatos() async {
     if (_formKey.currentState?.validate() ?? false) {
+      // Mostrar SnackBar de procesamiento
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Procesando registro...'),
+          duration: Duration(seconds: 2), // Establecer la duración deseada
+        ),
+      );
+
       final datosCliente = {
         'nombreCliente': _nombreClienteController.text,
         'numeroCelular': _numeroCelularController.text,
@@ -277,14 +287,21 @@ class _RegistroPageState extends State<RegistroPage> {
         'valorAPagar': _valorAPagarController.text,
         'metodoPago': _metodoPago ?? '',
         'fecha': _formatFecha(fecha),
-        'imagen': _imagenSeleccionada?.path, // Agregar la ruta de la imagen
         'atendidoPor': _atendidoPorController.text,
       };
 
-      await SQLHelper.createItem(datosCliente);
+      // Subir la imagen a Firebase Storage y obtener la URL
+      String imageUrl = '';
+      if (_imagenSeleccionada != null) {
+        imageUrl =
+            await FirebaseHelper.uploadImageToStorage(_imagenSeleccionada!);
+      }
 
-      // Subir los datos a Firestore usando FirebaseHelper
-      await FirebaseHelper.uploadDataToFirestore();
+      // Agregar la URL de la imagen a los datos del cliente
+      datosCliente['imagenUrl'] = imageUrl;
+
+      // Guardar los datos en Firestore
+      await FirebaseHelper.uploadDataToFirestore(datosCliente);
 
       _limpiarCampos();
 
@@ -301,6 +318,27 @@ class _RegistroPageState extends State<RegistroPage> {
           builder: (context) => const Menu(body: HomePage()),
         ),
       );
+    }
+  }
+
+// Método para subir la imagen a Firebase Storage
+  Future<void> _subirImagen(File imagen) async {
+    try {
+      // Referencia al bucket de Firebase Storage y ruta donde se guardará la imagen
+      final firebase_storage.Reference ref = firebase_storage
+          .FirebaseStorage.instance
+          .ref()
+          .child('Mascotas/${DateTime.now().millisecondsSinceEpoch}.jpg');
+
+      // Subir la imagen
+      await ref.putFile(imagen);
+
+      // Obtener la URL de descarga de la imagen
+      final String downloadURL = await ref.getDownloadURL();
+
+      print('Imagen subida con éxito: $downloadURL');
+    } catch (e) {
+      print('Error al subir la imagen: $e');
     }
   }
 

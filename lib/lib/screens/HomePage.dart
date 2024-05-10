@@ -1,8 +1,7 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:spamascotas/lib/screens/DetallesPantalla.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:spamascotas/lib/screens/DetallesCliente.dart';
 import 'package:spamascotas/lib/screens/NuevaPantalla.dart';
-import 'package:spamascotas/lib/utils/SQLHelper.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -12,29 +11,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<Map<String, dynamic>> _journals = [];
   List<Map<String, dynamic>> _filteredJournals = [];
   bool _isLoading = true;
   TextEditingController _searchController = TextEditingController();
-  final FocusNode _searchFocusNode = FocusNode();
-
-  void _clearSearch() {
-    setState(() {
-      _searchController.clear();
-      _filterJournals('');
-    });
-  }
-
-  void _refreshJournals() async {
-    print("Actualizando listas...");
-    final data = await SQLHelper.getRegistros();
-    setState(() {
-      _journals = data;
-      _filteredJournals = data;
-      _isLoading = false;
-    });
-    print("Listas actualizadas: $_journals");
-  }
 
   @override
   void initState() {
@@ -42,130 +21,25 @@ class _HomePageState extends State<HomePage> {
     _refreshJournals();
   }
 
-  final TextEditingController _clienteController = TextEditingController();
-  final TextEditingController _celularController = TextEditingController();
-
-  void _showForm(int? id) async {
-    if (id != null) {
-      final existingJournal =
-          _journals.firstWhere((element) => element['id'] == id);
-      _clienteController.text = existingJournal['nombreCliente'];
-      _celularController.text = existingJournal['numeroCelular'];
-    }
-
-    showModalBottomSheet(
-      context: context,
-      elevation: 5,
-      isScrollControlled: true,
-      builder: (_) => Container(
-        padding: EdgeInsets.only(
-          top: 15,
-          left: 15,
-          right: 15,
-          bottom: MediaQuery.of(context).viewInsets.bottom + 120,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            TextField(
-              controller: _clienteController,
-              decoration: const InputDecoration(hintText: 'Nombre del Cliente'),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: _celularController,
-              decoration: const InputDecoration(hintText: 'Número de Celular'),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () async {
-                if (id != null) {
-                  await _updateItem(id);
-                }
-                _clienteController.text = '';
-                _celularController.text = '';
-
-                if (!mounted) return;
-                Navigator.of(context).pop();
-              },
-              child: Text(id == null ? 'Crear Nuevo' : 'Actualizar'),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _updateItem(int id) async {
-    if (_clienteController.text.isNotEmpty) {
-      String? numeroCelular = _celularController.text;
-
-      await SQLHelper.updateItem(id, _clienteController.text, numeroCelular);
-      _refreshJournals();
-    } else {
-      print("Error: Datos incompletos");
-    }
-  }
-
-  Future<void> _deleteItem(int id) async {
-    bool confirmDelete = await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Confirmar eliminación'),
-          content:
-              const Text('¿Estás seguro de que quieres eliminar este cliente?'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(true);
-              },
-              child: const Text('Sí'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
-              child: const Text('No'),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (confirmDelete == true) {
-      await SQLHelper.deleteItem(id);
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Cliente eliminado exitosamente!'),
-      ));
-      _refreshJournals();
-    }
-  }
-
-  void _navigateToNewScreen() {
-    _searchFocusNode.unfocus();
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => RegistroPage(),
-      ),
-    ).then((_) {
-      _refreshJournals();
+  void _refreshJournals() async {
+    setState(() {
+      _isLoading = true;
     });
-  }
-
-  void _mostrarDetalles(Map<String, dynamic> registro) {
-    _searchFocusNode.unfocus();
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => DetallesPantalla(
-          registro: registro,
-          imagenPath: registro['imagen'],
-        ),
-      ),
-    );
+    try {
+      final querySnapshot =
+          await FirebaseFirestore.instance.collection('clientes').get();
+      setState(() {
+        _filteredJournals = querySnapshot.docs
+            .map((doc) => doc.data() as Map<String, dynamic>)
+            .toList();
+        _isLoading = false;
+      });
+    } catch (e) {
+      print("Error al recuperar los registros: $e");
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -183,7 +57,6 @@ class _HomePageState extends State<HomePage> {
               width: width * 0.4,
               child: TextField(
                 controller: _searchController,
-                focusNode: _searchFocusNode,
                 onChanged: _filterJournals,
                 decoration: InputDecoration(
                   hintText: 'Buscar cliente',
@@ -207,18 +80,20 @@ class _HomePageState extends State<HomePage> {
               color: Colors.transparent,
               padding:
                   const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-              child: Column(children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    subheading('Mis Clientes'),
-                    const SizedBox(
-                      width: 100,
-                    ),
-                  ],
-                ),
-              ]),
+              child: Column(
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      subheading('Mis Clientes'),
+                      const SizedBox(
+                        width: 100,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
             Expanded(
               child: SizedBox(
@@ -230,70 +105,49 @@ class _HomePageState extends State<HomePage> {
                     : ListView.builder(
                         itemCount: _filteredJournals.length,
                         itemBuilder: (context, index) {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 4.0, horizontal: 16.0),
-                            child: Card(
-                              elevation: 4,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                              child: ListTile(
-                                contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 8),
-                                leading:
-                                    _filteredJournals[index]['imagen'] != null
-                                        ? SizedBox(
-                                            width: 50,
-                                            height: 50,
-                                            child: Image.file(
-                                              File(_filteredJournals[index]
-                                                  ['imagen']),
-                                              fit: BoxFit.cover,
-                                            ),
-                                          )
-                                        : CircleAvatar(
-                                            backgroundColor: Colors.green[300],
-                                            child: const Icon(
-                                              Icons.pets,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                title: Text(
-                                  'Cliente: ${_filteredJournals[index]['nombreCliente']}',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'Montserrat',
-                                    fontSize: 14,
-                                  ),
-                                ),
-                                subtitle: Text(
-                                  'Celular: ${_filteredJournals[index]['numeroCelular']}',
-                                  style: const TextStyle(
-                                    fontFamily: 'Montserrat',
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                trailing: Wrap(
-                                  spacing: -8,
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(Icons.edit),
-                                      onPressed: () => _showForm(
-                                          _filteredJournals[index]['id']),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.delete),
-                                      onPressed: () => _deleteItem(
-                                          _filteredJournals[index]['id']),
-                                    ),
-                                  ],
-                                ),
-                                onTap: () {
-                                  _mostrarDetalles(_filteredJournals[index]);
-                                },
+                          return ListTile(
+                            leading:
+                                _filteredJournals[index]['imagenUrl'] != null
+                                    ? SizedBox(
+                                        width: 50,
+                                        height: 50,
+                                        child: Image.network(
+                                          _filteredJournals[index]['imagenUrl'],
+                                          fit: BoxFit.cover,
+                                        ),
+                                      )
+                                    : CircleAvatar(
+                                        backgroundColor: Colors.green[300],
+                                        child: const Icon(
+                                          Icons.pets,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                            title: Text(
+                              'Cliente: ${_filteredJournals[index]['nombreCliente']}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Montserrat',
+                                fontSize: 14,
                               ),
                             ),
+                            subtitle: Text(
+                              'Celular: ${_filteredJournals[index]['numeroCelular']}',
+                              style: const TextStyle(
+                                fontFamily: 'Montserrat',
+                                fontSize: 12,
+                              ),
+                            ),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => DetallesCliente(
+                                    cliente: _filteredJournals[index],
+                                  ),
+                                ),
+                              );
+                            },
                           );
                         },
                       ),
@@ -304,7 +158,17 @@ class _HomePageState extends State<HomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
-        onPressed: () => _navigateToNewScreen(),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => RegistroPage(),
+            ),
+          ).then((_) {
+            // Realiza alguna acción después de que el usuario regrese de la página de registro
+            _refreshJournals(); // Por ejemplo, actualiza la lista de clientes
+          });
+        },
       ),
     );
   }
@@ -321,19 +185,30 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _filterJournals(String query) {
-    print("Filtrando registros con query: $query");
+  void _clearSearch() {
     setState(() {
-      _filteredJournals = _journals.where((journal) {
-        final cliente =
-            (journal['nombreCliente'] ?? '').toString().toLowerCase();
-        final celular =
-            (journal['numeroCelular'] ?? '').toString().toLowerCase();
-
-        return cliente.contains(query.toLowerCase()) ||
-            celular.contains(query.toLowerCase());
-      }).toList();
+      _searchController.clear();
+      _filterJournals('');
     });
-    print("Registros filtrados: $_filteredJournals");
+  }
+
+  void _filterJournals(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        // Si la consulta está vacía, restaura la lista completa de clientes
+        _refreshJournals();
+      } else {
+        // Filtra los clientes basados en la consulta
+        _filteredJournals = _filteredJournals.where((journal) {
+          final cliente =
+              (journal['nombreCliente'] ?? '').toString().toLowerCase();
+          final celular =
+              (journal['numeroCelular'] ?? '').toString().toLowerCase();
+
+          return cliente.contains(query.toLowerCase()) ||
+              celular.contains(query.toLowerCase());
+        }).toList();
+      }
+    });
   }
 }
