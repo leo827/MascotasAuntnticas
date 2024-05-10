@@ -100,7 +100,9 @@ class DetallesCliente extends StatelessWidget {
           const SizedBox(height: 8),
           ElevatedButton(
             onPressed: () {
-              _launchCall(phoneNumber);
+              if (cliente['numeroCelular'] != null) {
+                _launchCall(cliente['numeroCelular'].toString());
+              }
             },
             child: Text('Llamar'),
           ),
@@ -122,7 +124,7 @@ class DetallesCliente extends StatelessWidget {
 
   void _launchCall(String? phoneNumber) async {
     if (phoneNumber != null) {
-      String url = 'telprompt:$phoneNumber';
+      String url = 'tel:$phoneNumber';
       if (await canLaunch(url)) {
         await launch(url);
       } else {
