@@ -294,16 +294,13 @@ class _RegistroPageState extends State<RegistroPage> {
   }
 
 // Método para guardar los datos del formulario
-  // Método para guardar los datos del formulario
   Future<void> _guardarDatos() async {
     if (_formKey.currentState?.validate() ?? false) {
-      // Mostrar SnackBar de procesamiento
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Procesando registro...'),
-          duration: Duration(seconds: 2), // Establecer la duración deseada
-        ),
+      // Mostrar Snackbar de procesamiento
+      final snackBar = SnackBar(
+        content: Text('Procesando registro...'),
       );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
       final datosCliente = {
         'nombreCliente': _nombreClienteController.text,
