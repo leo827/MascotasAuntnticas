@@ -298,9 +298,16 @@ class _RegistroPageState extends State<RegistroPage> {
     if (_formKey.currentState?.validate() ?? false) {
       // Mostrar Snackbar de procesamiento
       final snackBar = SnackBar(
-        content: Text('Procesando registro...'),
+        content: Row(
+          children: [
+            Text('Procesando registro...'),
+            SizedBox(width: 10), // Espacio entre el texto y los puntos
+            CircularProgressIndicator(), // Añadir un indicador de carga
+          ],
+        ),
       );
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      final snackBarController =
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
       final datosCliente = {
         'nombreCliente': _nombreClienteController.text,
@@ -330,6 +337,10 @@ class _RegistroPageState extends State<RegistroPage> {
 
       _limpiarCampos();
 
+      // Cerrar el Snackbar de procesamiento
+      snackBarController.close();
+
+      // Mostrar SnackBar de éxito
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Cliente registrado exitosamente!'),
