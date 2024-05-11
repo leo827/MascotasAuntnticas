@@ -121,6 +121,9 @@ class DetallesCliente extends StatelessWidget {
 
   void _launchWhatsApp(String? phoneNumber) async {
     if (phoneNumber != null) {
+      // Eliminar cualquier signo "+" al principio del número de teléfono
+      phoneNumber = phoneNumber.replaceAll('+', '');
+
       String url = 'https://wa.me/$phoneNumber';
       if (await canLaunch(url)) {
         await launch(url);
