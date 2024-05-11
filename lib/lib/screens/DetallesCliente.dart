@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class DetallesCliente extends StatelessWidget {
@@ -88,23 +89,30 @@ class DetallesCliente extends StatelessWidget {
   Widget _buildButtons(String? phoneNumber) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          ElevatedButton(
-            onPressed: () {
+          GestureDetector(
+            onTap: () {
               _launchWhatsApp(phoneNumber);
             },
-            child: Text('WhatsApp'),
+            child: Image.asset(
+              'assets/whatsapp.png', // Ruta de la imagen de WhatsApp
+              width: 40, // Ancho de la imagen
+              height: 40, // Alto de la imagen
+              fit: BoxFit
+                  .contain, // Ajustar la imagen para que quepa dentro del contenedor
+            ),
           ),
-          const SizedBox(height: 8),
-          ElevatedButton(
+          IconButton(
             onPressed: () {
               if (cliente['numeroCelular'] != null) {
                 _launchCall(cliente['numeroCelular'].toString());
               }
             },
-            child: Text('Llamar'),
+            icon: Icon(Icons.phone), // Icono de teléfono
+            iconSize: 40,
+            color: Colors.blue,
           ),
         ],
       ),
@@ -122,14 +130,7 @@ class DetallesCliente extends StatelessWidget {
     }
   }
 
-  void _launchCall(String? phoneNumber) async {
-    if (phoneNumber != null) {
-      String url = 'tel:$phoneNumber';
-      if (await canLaunch(url)) {
-        await launch(url);
-      } else {
-        throw 'No se pudo realizar la llamada.';
-      }
-    }
+  void _launchCall(String phoneNumber) {
+    FlutterPhoneDirectCaller.callNumber(phoneNumber);
   }
 }

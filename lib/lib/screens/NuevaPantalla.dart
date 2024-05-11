@@ -5,6 +5,7 @@ import 'HomePage.dart';
 import '../utils/SQLHelper.dart';
 import 'dart:io'; // Importamos dart:io para trabajar con archivos
 import 'package:image_picker/image_picker.dart'; // Importamos el paquete image_picker
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class RegistroPage extends StatefulWidget {
   const RegistroPage({Key? key}) : super(key: key);
@@ -229,13 +230,40 @@ class _RegistroPageState extends State<RegistroPage> {
   // Método para seleccionar una imagen desde la galería o la cámara
   Future<void> _seleccionarImagen(ImageSource source) async {
     final pickedFile = await ImagePicker().pickImage(source: source);
-    setState(() {
-      if (pickedFile != null) {
-        _imagenSeleccionada = File(pickedFile.path);
-      } else {
-        print('No se seleccionó ninguna imagen.');
+    if (pickedFile != null) {
+      final File imagenOriginal = File(pickedFile.path);
+      final File? imagenComprimida = await _comprimirImagen(imagenOriginal);
+      if (imagenComprimida != null) {
+        setState(() {
+          _imagenSeleccionada = imagenComprimida;
+        });
       }
-    });
+    } else {
+      print('No se seleccionó ninguna imagen.');
+    }
+  }
+
+  Future<File?> _comprimirImagen(File imagenOriginal) async {
+    // Obtener la ruta de salida para la imagen comprimida
+    final String carpeta = imagenOriginal
+        .parent.path; // Obtener la carpeta donde está la imagen original
+    final String nombreArchivo =
+        '${DateTime.now().millisecondsSinceEpoch}.jpg'; // Generar un nombre de archivo único
+    final String rutaSalida =
+        '$carpeta/comprimida_$nombreArchivo'; // Ruta de salida para la imagen comprimida
+
+    final result = await FlutterImageCompress.compressAndGetFile(
+      imagenOriginal.path,
+      rutaSalida, // Utilizar la nueva ruta de salida para la imagen comprimida
+      quality: 70, // Calidad de compresión (0 a 100)
+    );
+
+    if (result != null && result is XFile) {
+      return File(result.path);
+    } else {
+      // En caso de que el resultado no sea válido, retorna null
+      return null;
+    }
   }
 
 // Widget para el selector de imagen

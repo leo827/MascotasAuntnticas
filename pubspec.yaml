@@ -72,6 +72,7 @@ flutter:
   assets:
     - assets/
     - assets/images/avatar.png
+    - assets/whatsapp.png
   fonts:
   - family: Poppins
     fonts:
